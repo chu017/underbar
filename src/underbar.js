@@ -110,13 +110,21 @@
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
     var res = [];
-
-    for (var i = 0; i < array.length; i++) {
-      if (!res.includes(array[i])) {
-        res.push(array[i]);
+    var cur = [];
+    if (iterator) {
+      for (var i = 0; i < array.length; i++) {
+        if (!cur.includes(iterator(array[i]))) {
+          cur.push(iterator(array[i]));
+          res.push(array[i]);
+        }
+      }
+    } else {
+      for (var i = 0; i < array.length; i++) {
+        if (!res.includes(array[i])) {
+          res.push(array[i]);
+        }
       }
     }
-
     return res;
   };
 
@@ -178,8 +186,16 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
-    for (var i of collection) {
-      accumulator = iterator(accumulator, i);
+
+    if (accumulator === undefined) {
+      accumulator = collection[0];
+      _.each(collection.slice(1), function(item, index) {
+        accumulator = iterator(accumulator, item);
+      });
+    } else {
+      _.each(collection, function(item, index) {
+        accumulator = iterator(accumulator, item);
+      });
     }
     return accumulator;
 
